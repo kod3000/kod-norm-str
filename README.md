@@ -2,7 +2,7 @@
 # k.o.d. String Normalization
 (a better way to normalize strings into unique identifiers)
 
-![k.o.d. String Normalization](assets/simple.webp)
+![k.o.d. String Normalization](https://raw.githubusercontent.com/kod3000/kod-normalize-str/main/assets/simple.webp)
 
 ## Overview
 
