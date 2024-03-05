@@ -1,5 +1,5 @@
 
-# k.o.d. String Normalization
+# String Normalization
 (a better way to normalize strings into unique identifiers)
 
 ![k.o.d. String Normalization](https://raw.githubusercontent.com/kod3000/kod-normalize-str/main/assets/simple.webp)
