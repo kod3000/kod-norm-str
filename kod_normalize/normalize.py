@@ -38,7 +38,7 @@ def process_normalization(input_str):
     roman_numerals_map = {'Ⅰ': 1, 'Ⅱ': 2, 'Ⅲ': 3, 'Ⅳ': 4, 'Ⅴ': 5, 'Ⅵ': 6, 'Ⅶ': 7, 'Ⅷ': 8, 'Ⅸ': 9, 'Ⅹ': 10,
                           'Ⅺ': 11, 'Ⅻ': 12, 'Ⅼ': 50, 'Ⅽ': 100, 'Ⅾ': 500, 'Ⅿ': 1000}
     latin_chars_translate = {225: 'a', 224: 'a', 226: 'a', 227: 'a', 228: 'a', 229: 'a', 233: 'e', 232: 'e', 234: 'e',
-                             324:'n',
+                             324:'n', 220: 'U', 262:'C', 192: 'A', 195: 'A',
                                 235: 'e', 237: 'i', 236: 'i', 238: 'i', 239: 'i', 243: 'o', 242: 'o', 244: 'o', 245: 'o',
                                 246: 'o', 250: 'u', 249: 'u', 251: 'u', 252: 'u', 231: 'c', 241: 'n', 193: 'A', 201: 'E',
                                 205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N', 305: 'i', 304: 'I', 350: 'S', 351: 's'}
@@ -66,7 +66,8 @@ def process_normalization(input_str):
         if len(decomposed_char) > 1:
             # Decomosed char is inside the string
             # here we modify the string to replace the decomposed char
-            # print(f"Decomposed char: {decomposed_char} {len(decomposed_char) > 1} {ord(char)}")
+            # print(f"Decomposed char: {decomposed_char} {len(decomposed_char) > 1} {ord(char)}") # uncomment to see what char is not registered
+            # developer Note : if the char is not registered, add it to the latin_chars_translate object
             modified_str += decomposed_char[0]  # Keep the base character.
             string_len_record += 1
             modifications_count += len(decomposed_char) - 1  # Count each additional character as a modification.
