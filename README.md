@@ -66,12 +66,23 @@ It also includes the following helper functions:
 ### Usage Example
 
 ```python
-original_string = "my string 안녕하세요"
-normalized_string = normalize(original_string)
-print(normalized_string)
-```
+# Import the normalize function from the kod_normalize package
+from kod_normalize.normalize import normalize
+# test the normalize function
+print(normalize("Bad Bunny - DÁKITI")) # decomposed (the accent is a separate character)
+print(normalize("Bad Bunny - DÁKITI")) # non-decomposed (meaning the single character has an accent)
 
-This code snippet will decompose the Hangul syllables, normalize the string by removing any special characters or accents, and append a unique hash to the result.
+print(normalize("Kraftwerk - Radioactivity (François Kervorkian 12” Remix)")) # mixed (has decomposed and non-decomposed characters)
+print(normalize("Kraftwerk - Radioactivity (François Kervorkian 12” Remix)")) # non-decomposed only
+
+print(normalize("Psy - Gangnam Style (강남스타일)")) # decomposed
+print(normalize("Psy - Gangnam Style (강남스타일)")) # non-decomposed
+
+```
+This code snippet shows how identical looking strings can be very misleading, and at worse times cause duplicate
+data to be inserted. The normalize function decomposes accents, Hangul syllables, and other characters to normalize
+the string by removing any special characters or accents, and append a unique hash to the result. Assuring that visually
+identical strings are also identical in their normalization.
 
 ## Conclusion
 
@@ -82,3 +93,21 @@ The addition of a unique hash to the normalized string further enhances its util
 distinguish between visually identical strings. This utility is a valuable addition to any application that 
 deals with text data from diverse sources and requires a consistent and predictable format for processing, 
 storage, or comparison.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+If you find this project useful, please consider giving it a star on GitHub and sharing it with others.
+
+## Troubleshooting
+
+If you encounter any issues while using this utility, please feel free to open an issue on GitHub.
+
+## Contributing
+
+Contributions are very welcome! If you would like to contribute to this project, 
+please feel free to open a pull request or submit an issue. I am always open to new ideas and improvements.
