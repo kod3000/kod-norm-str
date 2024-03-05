@@ -34,14 +34,17 @@ def process_normalization(input_str):
     translate_sym_ord = {769: ' ́', 768: '`', 776: '¨', 770: '^', 771: '˜', 772: '¯', 728: '˘', 711: 'ˇ', 710: 'ˆ',
                          729: '˙', 184: '¸', 733: '˝', 697: '˛', 807: '˛', 697: '˝', 697: '˛', 697: '˝', 697: '˛'}
     translate_letters = {101: 'e', 97: 'a', 105: 'i', 111: 'o', 117: 'u', 99: 'c', 110: 'n', 65: 'A', 69: 'E', 73: 'I',
-                         79: 'O', 85: 'U', 67: 'C', 78: 'N'}
+                         79: 'O', 85: 'U', 67: 'C', 78: 'N', 105: 'i', 304: 'I', 350: 'S', 351: 's', 115: 's', 83: 'S'}
     roman_numerals_map = {'Ⅰ': 1, 'Ⅱ': 2, 'Ⅲ': 3, 'Ⅳ': 4, 'Ⅴ': 5, 'Ⅵ': 6, 'Ⅶ': 7, 'Ⅷ': 8, 'Ⅸ': 9, 'Ⅹ': 10,
                           'Ⅺ': 11, 'Ⅻ': 12, 'Ⅼ': 50, 'Ⅽ': 100, 'Ⅾ': 500, 'Ⅿ': 1000}
     latin_chars_translate = {225: 'a', 224: 'a', 226: 'a', 227: 'a', 228: 'a', 229: 'a', 233: 'e', 232: 'e', 234: 'e',
+                             324:'n',
                                 235: 'e', 237: 'i', 236: 'i', 238: 'i', 239: 'i', 243: 'o', 242: 'o', 244: 'o', 245: 'o',
                                 246: 'o', 250: 'u', 249: 'u', 251: 'u', 252: 'u', 231: 'c', 241: 'n', 193: 'A', 201: 'E',
-                                205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N'}
-
+                                205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N', 305: 'i', 304: 'I', 350: 'S', 351: 's'}
+    basic_special_chars = {32: ' ', 33: '!', 34: '"', 35: '#', 36: '$', 37: '%', 38: '&', 39: "'", 40: '(', 41: ')', 42: '*',
+                           43: '+', 44: ',', 45: '-', 46: '.', 47: '/', 58: ':', 59: ';', 60: '<', 61: '=', 62: '>', 63: '?', 64: '@',
+                           91: '[', 92: '\\', 93: ']', 94: '^', 95: '_', 96: '`', 123: '{', 124: '|', 125: '}', 126: '~'}
     # we need to check for modifications that may need to be made to the string
     sterialized_str = input_str
     char_position = 0
@@ -51,54 +54,61 @@ def process_normalization(input_str):
     pre_pos_mod = 0 # here we track how many positions we removed from he string
     special_char_mean = 0
     special_position = 0   # this will be used to track the position of the special char
+    char_mod_mean_prev = 0
     for char in sterialized_str:
         # print(f"Char: {char} + {ord(char)}")
         if char in roman_numerals_map:
+            # here we modify the string to replace the roman numeral
             modifications_count += 1
-            # print(f"Found roman numeral: {char}")
             char = str(roman_numerals_map[char])
             # print(f"Converted to: {char}")
         decomposed_char = unicodedata.normalize('NFKD', char)
         if len(decomposed_char) > 1:
-            # mod need
+            # Decomosed char is inside the string
+            # here we modify the string to replace the decomposed char
             # print(f"Decomposed char: {decomposed_char} {len(decomposed_char) > 1} {ord(char)}")
-            # print(f"{len(decomposed_char[0])}")
             modified_str += decomposed_char[0]  # Keep the base character.
             string_len_record += 1
             modifications_count += len(decomposed_char) - 1  # Count each additional character as a modification.
+            char_mod_mean_prev = char_mod_mean # just in case if we need to revert back
             char_mod_mean += (char_position - pre_pos_mod)
             # print(f"Char Mod Mean: {char_mod_mean}, Char Position: {char_position}")
             if len(char) == 1:
+                # here we check that the char is holding a single char
                 # print(f"Char: {char} + {ord(char)}")
                 if(ord(char) in latin_chars_translate):
+                    # if the char is a latin char then we replace it with nonlatin char
                     # print(f"Added latin char: {latin_chars_translate[ord(char)]} + {ord(latin_chars_translate[ord(char)])}")
                     char_ascii_mean += 1
                     char = latin_chars_translate[ord(char)]
+                    char_ascii_mean += ord(char)
                 elif (ord(char)  > 40004 and ord(char) < 58005):
+                    # if we have a high unicode char then we need to decompose it as a hangul char
                     check_dec = decompose_hangul(char)
                     # print(f"Decomposed char: {check_dec}")
+                    # we also reset the char_mod_mean to the previous value
+                    char_mod_mean = char_mod_mean_prev # we do this cause we are about to add in additional chars to the string
                     for dec in check_dec:
                         if dec != 0:
                             # print(f"Char: {chr(dec)} + {dec}")
                             # if the last char is decomposed_char[0] then we remove it from modified_str
                             if decomposed_char[0] == modified_str[-1]:
                                 modified_str = modified_str[:-1]
-                                string_len_record -= 2
+                                string_len_record -= 1
                                 modifications_count += 1
-                                char_ascii_mean -= ord(decomposed_char[0])
-
+                                # char_ascii_mean -= ord(decomposed_char[0])
                             #     print(f"Removed last char: {decomposed_char[0]} + {ord(decomposed_char[0])}")
                             # modified_str += chr(dec)
                             special_char_mean += dec
                             special_position += 1
-
                             string_len_record += 1
-                            # char = high_unicode_translate[dec]
+                            char_ascii_mean += dec
+                else:
                     # print(f"Added high unicode char: {high_unicode_translate[ord(char)]} + {ord(high_unicode_translate[ord(char)])}")
                     char_ascii_mean += 1
                     # char = high_unicode_translate[ord(char)]
                     string_len_record += 1
-                char_ascii_mean += ord(char)
+                    char_ascii_mean += ord(char)
             elif len(char) > 1:
                 # print(f"Char: {char} + {ord(char)} .. has more than 1 char")
                 # go through each character in the decomposed string and add their ascii values
@@ -108,8 +118,7 @@ def process_normalization(input_str):
                         c = latin_chars_translate[ord(c)]
                     char_ascii_mean += ord(c)
         else:
-            # If the character is not decomposed, append it as is.
-            # if len(char) > 1:
+            # char we will have to be processed manually.
             # print(f"Char: {char} + {ord(char)}")
             # here we detect if the char is a special char
             if char in special_char or ord(char) in translate_sym_ord:
@@ -122,7 +131,7 @@ def process_normalization(input_str):
                     previous_char = sterialized_str[char_position - 1]
                     pre_pos_mod += 1
 
-                # print(f"Previous char: {previous_char} + {ord(previous_char)}")
+                # print(f"Previous char: {previous_char} + {ord(previous_char)} {(ord(previous_char) in translate_letters)}")
 
                 # now we check if the char is a latin char
                 if(ord(previous_char) in translate_letters):
@@ -149,7 +158,7 @@ def process_normalization(input_str):
 
     if modifications_count == 0:
         return modified_str
-    print(f"Special Char Mean: {special_char_mean}")
+    # print(f"Special Char Mean: {special_char_mean}")
     # Append the modifications count to the modified string.
 
     # used for debugging
@@ -166,6 +175,9 @@ def normalize(custom_str):
     normalized = re.sub(r'\s+', '', normalized)
     normalized = re.sub(r'[^\w\s]', '', normalized)
 
+
+
+    # return process_normalization(custom_str)
     # Generate a short hash of the processed custom_str
     hash_suffix = hashlib.blake2b(process_normalization(custom_str).encode('utf-8'), digest_size=4).hexdigest()
 
