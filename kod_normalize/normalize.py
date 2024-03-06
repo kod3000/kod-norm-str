@@ -2,6 +2,32 @@ import re
 import hashlib
 import unicodedata
 
+# TODO: Move these to a seperate file and give detail on why they are needed
+special_char = {"`", " ́", "¨", "^", "˜", "¯", "˘", "ˇ", "ˆ", "˙", "˚",
+                "¸", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝"}
+translate_sym_ord = {769: ' ́', 768: '`', 776: '¨', 770: '^', 771: '˜', 772: '¯', 728: '˘', 711: 'ˇ', 710: 'ˆ',
+                     774: ' ̆', 775: 'ˇ', 778: '˚', 321: 'Ł', 322: 'ł', 780: ' ̌', 779: ' ̋',
+                     729: '˙', 184: '¸', 733: '˝', 697: '˛', 807: '˛', 808: '˝', 809: '˛', 810: '˝', 811: '˛'}
+roman_numerals_map = {'Ⅰ': 1, 'Ⅱ': 2, 'Ⅲ': 3, 'Ⅳ': 4, 'Ⅴ': 5, 'Ⅵ': 6, 'Ⅶ': 7, 'Ⅷ': 8, 'Ⅸ': 9, 'Ⅹ': 10,
+                      'Ⅺ': 11, 'Ⅻ': 12, 'Ⅼ': 50, 'Ⅽ': 100, 'Ⅾ': 500, 'Ⅿ': 1000}
+translate_letters = {101: 'e', 97: 'a', 105: 'i', 111: 'o', 117: 'u', 99: 'c', 110: 'n', 65: 'A', 69: 'E', 73: 'I',
+                     103: 'g', 90: 'Z', 122: 'z', 121: 'y',
+                     79: 'O', 85: 'U', 67: 'C', 78: 'N', 105: 'i', 304: 'I', 350: 'S', 351: 's', 115: 's', 83: 'S'}
+latin_chars_translate = {225: 'a', 224: 'a', 226: 'a', 227: 'a', 228: 'a', 229: 'a', 233: 'e', 232: 'e', 234: 'e',
+                         324: 'n', 220: 'U', 262: 'C', 192: 'A', 195: 'A', 287: 'g', 379: 'Z', 280: 'E', 269: 'c',
+                         337: 'o', 380: 'z', 346: 'S', 253: 'y', 377: 'Z', 196: 'A', 353: 's', 367:'u',
+                         235: 'e', 237: 'i', 236: 'i', 238: 'i', 239: 'i', 243: 'o', 242: 'o', 244: 'o', 245: 'o',
+                         246: 'o', 250: 'u', 249: 'u', 251: 'u', 252: 'u', 231: 'c', 241: 'n', 193: 'A', 201: 'E',
+                         205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N', 305: 'i', 304: 'I', 350: 'S',
+                         351: 's'}
+
+basic_special_chars = {32: ' ', 33: '!', 34: '"', 35: '#', 36: '$', 37: '%', 38: '&', 39: "'", 40: '(', 41: ')',
+                       42: '*',
+                       43: '+', 44: ',', 45: '-', 46: '.', 47: '/', 58: ':', 59: ';', 60: '<', 61: '=', 62: '>',
+                       63: '?', 64: '@',
+                       91: '[', 92: '\\', 93: ']', 94: '^', 95: '_', 96: '`', 123: '{', 124: '|', 125: '}', 126: '~'}
+
+
 # Let's do some Decomposition of Hangul syllables into Jamo characters
 def decompose_hangul(syllable):
     # Hangul syllable decomposition
@@ -29,6 +55,26 @@ def analyze_non_decomposed():
     # TODO: transfer in the logic for the non decompose char
     pass
 
+def diagnose_decompose(input_str):
+    """Diagnose the decomposition of a string."""
+    string_failed = True
+    for char in input_str:
+        decomposed_char = unicodedata.normalize('NFKD', char)
+        if len(decomposed_char) > 1:
+            if len(char) == 1 and (ord(char)  > 200) and (ord(char) not in latin_chars_translate):
+                string_failed = False
+                print(f"Decomposed char: {decomposed_char} {len(decomposed_char) > 1} {ord(char)}")
+                # developer Note : if the char is not registered, add it to the latin_chars_translate object
+                print(f"Try adding {ord(char)} to latin_chars_translate, the char is {decomposed_char}")
+                pass
+
+    if string_failed:
+        print(f"String '{input_str}' passes decompose test .. ")
+    else:
+        print(f"String '{input_str}' failed decompose test .. ")
+    return string_failed
+
+
 # Todo: We need to refactor this function to make it more readable and maintainable
 def process_normalization(input_str):
     """Remove accents from a string and count removed accents and special characters."""
@@ -36,26 +82,6 @@ def process_normalization(input_str):
     modifications_count = 0
     # Initialize an empty string to hold the modified input string without accents.
     modified_str = ""
-    # TODO: Move these to a seperate file and give detail on why they are needed
-    special_char = {"`", " ́", "¨", "^", "˜", "¯", "˘", "ˇ", "ˆ", "˙", "˚",
-                    "¸", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝"}
-    translate_sym_ord = {769: ' ́', 768: '`', 776: '¨', 770: '^', 771: '˜', 772: '¯', 728: '˘', 711: 'ˇ', 710: 'ˆ',
-                         774: ' ̆', 775: 'ˇ',778: '˚', 321: 'Ł', 322: 'ł',780:' ̌',779:' ̋',
-                         729: '˙', 184: '¸', 733: '˝', 697: '˛', 807: '˛', 808: '˝', 809: '˛', 810: '˝', 811: '˛'}
-    translate_letters = {101: 'e', 97: 'a', 105: 'i', 111: 'o', 117: 'u', 99: 'c', 110: 'n', 65: 'A', 69: 'E', 73: 'I',
-                         103: 'g', 90:'Z', 122:'z',
-                         79: 'O', 85: 'U', 67: 'C', 78: 'N', 105: 'i', 304: 'I', 350: 'S', 351: 's', 115: 's', 83: 'S'}
-    roman_numerals_map = {'Ⅰ': 1, 'Ⅱ': 2, 'Ⅲ': 3, 'Ⅳ': 4, 'Ⅴ': 5, 'Ⅵ': 6, 'Ⅶ': 7, 'Ⅷ': 8, 'Ⅸ': 9, 'Ⅹ': 10,
-                          'Ⅺ': 11, 'Ⅻ': 12, 'Ⅼ': 50, 'Ⅽ': 100, 'Ⅾ': 500, 'Ⅿ': 1000}
-    latin_chars_translate = {225: 'a', 224: 'a', 226: 'a', 227: 'a', 228: 'a', 229: 'a', 233: 'e', 232: 'e', 234: 'e',
-                             324:'n', 220: 'U', 262:'C', 192: 'A', 195: 'A', 287: 'g', 379: 'Z',280:'E',269:'c',
-                             337:'o', 380:'z',
-                                235: 'e', 237: 'i', 236: 'i', 238: 'i', 239: 'i', 243: 'o', 242: 'o', 244: 'o', 245: 'o',
-                                246: 'o', 250: 'u', 249: 'u', 251: 'u', 252: 'u', 231: 'c', 241: 'n', 193: 'A', 201: 'E',
-                                205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N', 305: 'i', 304: 'I', 350: 'S', 351: 's'}
-    basic_special_chars = {32: ' ', 33: '!', 34: '"', 35: '#', 36: '$', 37: '%', 38: '&', 39: "'", 40: '(', 41: ')', 42: '*',
-                           43: '+', 44: ',', 45: '-', 46: '.', 47: '/', 58: ':', 59: ';', 60: '<', 61: '=', 62: '>', 63: '?', 64: '@',
-                           91: '[', 92: '\\', 93: ']', 94: '^', 95: '_', 96: '`', 123: '{', 124: '|', 125: '}', 126: '~'}
     # we need to check for modifications that may need to be made to the string
     sterialized_str = input_str
     char_position = 0
@@ -75,10 +101,8 @@ def process_normalization(input_str):
             # print(f"Converted to: {char}")
         decomposed_char = unicodedata.normalize('NFKD', char)
         if len(decomposed_char) > 1:
-            # Decomosed char is inside the string
+            # Decomosed char is inside the string (test it using diagnose_decompose)
             # here we modify the string to replace the decomposed char
-            # print(f"Decomposed char: {decomposed_char} {len(decomposed_char) > 1} {ord(char)}") # uncomment to see what char is not registered
-            # developer Note : if the char is not registered, add it to the latin_chars_translate object
             modified_str += decomposed_char[0]  # Keep the base character.
             string_len_record += 1
             modifications_count += len(decomposed_char) - 1  # Count each additional character as a modification.
@@ -114,11 +138,15 @@ def process_normalization(input_str):
                             string_len_record += 1
                             char_ascii_mean += dec
                 else:
-                    # print(f"Added high unicode char: {high_unicode_translate[ord(char)]} + {ord(high_unicode_translate[ord(char)])}")
                     char_ascii_mean += 1
-                    # char = high_unicode_translate[ord(char)]
                     string_len_record += 1
                     char_ascii_mean += ord(char)
+                    # after we added it ...
+                    # we want to see if the char is a latin char and was never registered
+                    if ord(char) not in latin_chars_translate and ord(char) > 200:
+                        print(f"Char: {char} + {ord(char)}")
+                        print(f"Try adding {ord(char)} to latin_chars_translate, the char is {char}")
+                        pass
             elif len(char) > 1:
                 # print(f"Char: {char} + {ord(char)} .. has more than 1 char")
                 # go through each character in the decomposed string and add their ascii values
@@ -183,8 +211,6 @@ def normalize(custom_str):
     normalized = no_accents.lower()
     normalized = re.sub(r'\s+', '', normalized)
     normalized = re.sub(r'[^\w\s]', '', normalized)
-
-
 
     # return process_normalization(custom_str)
     # Generate a short hash of the processed custom_str
