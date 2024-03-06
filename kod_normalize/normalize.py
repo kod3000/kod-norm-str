@@ -21,6 +21,14 @@ def decompose_hangul(syllable):
     return [L, V, T if T != TBase else 0]
 
 
+def analyze_decomposed():
+    # TODO: transfer in the logic for the decompose char
+    pass
+
+def analyze_non_decomposed():
+    # TODO: transfer in the logic for the non decompose char
+    pass
+
 # Todo: We need to refactor this function to make it more readable and maintainable
 def process_normalization(input_str):
     """Remove accents from a string and count removed accents and special characters."""
@@ -32,13 +40,16 @@ def process_normalization(input_str):
     special_char = {"`", " ́", "¨", "^", "˜", "¯", "˘", "ˇ", "ˆ", "˙", "˚",
                     "¸", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝", "˛", "˝"}
     translate_sym_ord = {769: ' ́', 768: '`', 776: '¨', 770: '^', 771: '˜', 772: '¯', 728: '˘', 711: 'ˇ', 710: 'ˆ',
-                         729: '˙', 184: '¸', 733: '˝', 697: '˛', 807: '˛', 697: '˝', 697: '˛', 697: '˝', 697: '˛'}
+                         774: ' ̆', 775: 'ˇ',778: '˚', 321: 'Ł', 322: 'ł',780:' ̌',779:' ̋',
+                         729: '˙', 184: '¸', 733: '˝', 697: '˛', 807: '˛', 808: '˝', 809: '˛', 810: '˝', 811: '˛'}
     translate_letters = {101: 'e', 97: 'a', 105: 'i', 111: 'o', 117: 'u', 99: 'c', 110: 'n', 65: 'A', 69: 'E', 73: 'I',
+                         103: 'g', 90:'Z', 122:'z',
                          79: 'O', 85: 'U', 67: 'C', 78: 'N', 105: 'i', 304: 'I', 350: 'S', 351: 's', 115: 's', 83: 'S'}
     roman_numerals_map = {'Ⅰ': 1, 'Ⅱ': 2, 'Ⅲ': 3, 'Ⅳ': 4, 'Ⅴ': 5, 'Ⅵ': 6, 'Ⅶ': 7, 'Ⅷ': 8, 'Ⅸ': 9, 'Ⅹ': 10,
                           'Ⅺ': 11, 'Ⅻ': 12, 'Ⅼ': 50, 'Ⅽ': 100, 'Ⅾ': 500, 'Ⅿ': 1000}
     latin_chars_translate = {225: 'a', 224: 'a', 226: 'a', 227: 'a', 228: 'a', 229: 'a', 233: 'e', 232: 'e', 234: 'e',
-                             324:'n', 220: 'U', 262:'C', 192: 'A', 195: 'A',
+                             324:'n', 220: 'U', 262:'C', 192: 'A', 195: 'A', 287: 'g', 379: 'Z',280:'E',269:'c',
+                             337:'o', 380:'z',
                                 235: 'e', 237: 'i', 236: 'i', 238: 'i', 239: 'i', 243: 'o', 242: 'o', 244: 'o', 245: 'o',
                                 246: 'o', 250: 'u', 249: 'u', 251: 'u', 252: 'u', 231: 'c', 241: 'n', 193: 'A', 201: 'E',
                                 205: 'I', 211: 'O', 214: 'O', 218: 'U', 199: 'C', 209: 'N', 305: 'i', 304: 'I', 350: 'S', 351: 's'}
@@ -93,12 +104,10 @@ def process_normalization(input_str):
                         if dec != 0:
                             # print(f"Char: {chr(dec)} + {dec}")
                             # if the last char is decomposed_char[0] then we remove it from modified_str
-                            if decomposed_char[0] == modified_str[-1]:
+                            if len(modified_str) > 0 and decomposed_char[0] == modified_str[-1] :
                                 modified_str = modified_str[:-1]
                                 string_len_record -= 1
                                 modifications_count += 1
-                                # char_ascii_mean -= ord(decomposed_char[0])
-                            #     print(f"Removed last char: {decomposed_char[0]} + {ord(decomposed_char[0])}")
                             # modified_str += chr(dec)
                             special_char_mean += dec
                             special_position += 1
@@ -120,7 +129,7 @@ def process_normalization(input_str):
                     char_ascii_mean += ord(c)
         else:
             # char we will have to be processed manually.
-            # print(f"Char: {char} + {ord(char)}")
+            # print(f"ND-Char: {char} + {ord(char)}")
             # here we detect if the char is a special char
             if char in special_char or ord(char) in translate_sym_ord:
                 # print(f"Found special char: {char} + {ord(char)}")
@@ -164,7 +173,6 @@ def process_normalization(input_str):
 
     # used for debugging
     # return f"{modified_str}_mods_len_{string_len_record}_modCount_{modifications_count}_charModMean_{char_mod_mean}_charAsciiMean_{char_ascii_mean}"
-
     return f"{modified_str}_mods_{string_len_record}{modifications_count}{char_mod_mean}{char_ascii_mean}"
 
 
