@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="kod-norm-str",
-    version="0.2.46",
+    version="0.3.0",
     author="Nestor Rivera",
     author_email="kod3000@gmail.com",
     description="A package for normalizing and generating a unique identifier of "
